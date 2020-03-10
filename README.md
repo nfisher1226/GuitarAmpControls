@@ -1,7 +1,7 @@
-#Guitar Amplifier Controls
+# Guitar Amplifier Controls
 Uses an Arduino to control guitar amplifier functions.
 
-##Basic functions:
+## Basic functions:
 	Startup timer counts a 15 second delay after power on before switching
 		on the B+ high voltage via a relay circuit
 	Channel switching controls two banks of vactrols to switch between
@@ -9,7 +9,7 @@ Uses an Arduino to control guitar amplifier functions.
 	Four different waveforms of LFO are output simultaneously. For
 		simplicity switching is handled externally in the analog realm.
 
-##Pin connections
+## Pin connections
 Mains (B+) relay circuit - digital pin 12
 Channel Select - digital pin 2
 Channel 1 output (vactrol/relay circuit) - digital pin 4
@@ -21,7 +21,7 @@ Sawtooth LFO - digital pin 9
 Reverse Sawtooth LFO - digital pin 10
 Square wave LFO - digital pin 11
 
-##Usage Notes
+## Usage Notes
 Channel select and tremolo on/off switches should switch the pin between
 5v supply (on) and ground (off).
 
