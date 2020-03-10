@@ -2,12 +2,12 @@
 Uses an Arduino to control guitar amplifier functions.
 
 ## Basic functions:
-	Startup timer counts a 15 second delay after power on before switching
-		on the B+ high voltage via a relay circuit
-	Channel switching controls two banks of vactrols to switch between
-		channels
-	Four different waveforms of LFO are output simultaneously. For
-		simplicity switching is handled externally in the analog realm.
+* Startup timer counts a 15 second delay after power on before switching
+on the B+ high voltage via a relay circuit
+* Channel switching controls two banks of vactrols to switch between
+channels
+* Four different waveforms of LFO are output simultaneously. For
+simplicity switching is handled externally in the analog realm.
 
 ## Pin connections
 * Mains (B+) relay circuit - digital pin 12
