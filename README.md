@@ -10,16 +10,16 @@ Uses an Arduino to control guitar amplifier functions.
 		simplicity switching is handled externally in the analog realm.
 
 ## Pin connections
-Mains (B+) relay circuit - digital pin 12
-Channel Select - digital pin 2
-Channel 1 output (vactrol/relay circuit) - digital pin 4
-Channel 2 output (vactrol/relay circuit) - digital pin 5
-Tremolo indicator light - digital pin 7
-Tremolo speed control - analog pin A1
-Sine LFO - digital pin 3
-Sawtooth LFO - digital pin 9
-Reverse Sawtooth LFO - digital pin 10
-Square wave LFO - digital pin 11
+* Mains (B+) relay circuit - digital pin 12
+* Channel Select - digital pin 2
+* Channel 1 output (vactrol/relay circuit) - digital pin 4
+* Channel 2 output (vactrol/relay circuit) - digital pin 5
+* Tremolo indicator light - digital pin 7
+* Tremolo speed control - analog pin A1
+* Sine LFO - digital pin 3
+* Sawtooth LFO - digital pin 9
+* Reverse Sawtooth LFO - digital pin 10
+* Square wave LFO - digital pin 11
 
 ## Usage Notes
 Channel select and tremolo on/off switches should switch the pin between
