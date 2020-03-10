@@ -38,6 +38,7 @@ const int squarePin = 11;	// square wave
 
 int interval = 10;
 byte brightness = 0;
+int loopCount = 0;
 byte a = 0;
 byte b = 0;
 byte c = 0;
@@ -112,23 +113,6 @@ const byte sawrevTable[] = {
 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
 };
 
-const byte squareTable[] = {
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
 // the setup function runs once when you press reset or power the board
 void setup() {
 	// initialize digital pin mainsRelayPin as an output.
@@ -141,6 +125,8 @@ void setup() {
 	pinMode(ch1Pin, OUTPUT);
 	pinMode(ch2Pin, OUTPUT);
 	pinMode(trledPin, OUTPUT);
+	// initialize square wave pin as output
+	pinMode(squarePin, OUTPUT);
 }
 
 
@@ -158,7 +144,7 @@ void loop() {
 		digitalWrite(ch2Pin, HIGH);
 	}
 	
-	// switch the tremolo vactol on/off
+	// switch the tremolo on/off
   trswitchState = digitalRead(trswitchPin);
 	if (trswitchState == HIGH) {
 		digitalWrite(trledPin, HIGH);
@@ -169,8 +155,6 @@ void loop() {
 		analogWrite(sawPin, brightness);
 		brightness = sawrevTable[c];
 		analogWrite(sawrevPin, brightness);
-		brightness = squareTable[d];
-		analogWrite(squarePin, brightness);
     unsigned long currentMicros = micros();
 		if (currentMicros - previousMicros >= interval) {
 			// save the last pwm state change time
@@ -179,7 +163,15 @@ void loop() {
 			a++;
 			b++;
 			c++;
-			d++;
+			if (loopCount <= 127) {
+				digitalWrite(squarePin, HIGH);
+			} else {
+				digitalWrite(squarePin, LOW);
+			}
+			loopCount++;
+			if (loopCount >= 255) {
+				loopCount = 0;
+			}
 		}
 	} else {
 		digitalWrite(trledPin, LOW);
