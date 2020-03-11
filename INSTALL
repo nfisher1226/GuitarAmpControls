@@ -1,0 +1,31 @@
+This program is currently tested on the uno and nano boards and
+verified to work on either. If you have another board, it may work
+or may require some adjustment depending on pin layout or other
+factors. I'm using it on a Chinese clone without issues. 
+
+There are at least three ways to install the program onto an Arduino.
+
+If you use the Arduino IDE then just open AmpControls.ino with
+the IDE and install as normal.
+
+If you have the arduino-cli program installed and like doing it
+all manually that is method two.
+
+If you have the arduino-cli program installed, and you are running
+some form of *nix, there is a Makefile present in the distribution
+which will compile and upload to your board. First step is to find
+out what board you have and get it's fqbn string plus the port it
+is plugged into. Plug in your board and use the make target "list".
+
+	% make list
+
+Make will try to determine the correct board and port, and save the
+information in config.mk. It is recommended to look over that file
+and edit if neccessary before building. The build is then the
+usual command when compiling from source.
+
+	% make
+
+To install (upload) onto your board:
+
+	% make install
