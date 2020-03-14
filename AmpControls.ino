@@ -131,24 +131,24 @@ void loop() {
 			sinb = sineTable[r];
 			analogWrite(traPin, sina);
 			analogWrite(trbPin, sinb);
-			analogWrite(trindPin, sina);
+			analogWrite(trindPin, sinb);
 		} else if (trmode < 600) {
 			analogWrite(traPin, loopCount);
 			analogWrite(trbPin, looprevCount);
-			analogWrite(trindPin, loopCount);
+			analogWrite(trindPin, looprevCount);
 		} else if (trmode < 900) {
 			analogWrite(traPin, looprevCount);
 			analogWrite(trbPin, loopCount);
-			analogWrite(trindPin, looprevCount);
+			analogWrite(trindPin, loopCount);
 		} else {
 			if (loopCount <= 127) {
 				digitalWrite(traPin, HIGH);
 				digitalWrite(trbPin, LOW);
-				digitalWrite(trindPin, HIGH);
+				digitalWrite(trindPin, LOW);
 			} else {
 				digitalWrite(traPin, LOW);
 				digitalWrite(trbPin, HIGH);
-				digitalWrite(trindPin, LOW);
+				digitalWrite(trindPin, HIGH);
 			}
 		}
 	} else {
