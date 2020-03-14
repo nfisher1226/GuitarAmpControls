@@ -6,20 +6,19 @@ Uses an Arduino to control guitar amplifier functions.
 on the B+ high voltage via a relay circuit
 * Channel switching controls two banks of vactrols to switch between
 channels
-* Four different waveforms of LFO are output simultaneously. For
-simplicity switching is handled externally in the analog realm.
+* A tremolo LFO is initiated, switchable between four different wave forms
 
 ## Pin connections
 * Mains (B+) relay circuit - digital pin 12
 * Channel Select - digital pin 2
-* Channel 1 output (vactrol/relay circuit) - digital pin 4
-* Channel 2 output (vactrol/relay circuit) - digital pin 5
-* Tremolo indicator light - digital pin 7
+* Channel 1 output (vactrol/relay circuit) - digital pin 3
+* Channel 2 output (vactrol/relay circuit) - digital pin 4
+* LFO-A - digital pin 5
+* LFO-B - digital pin 6
+* Tremolo on/off switch - digital pin 7
+* Tremolo indicator light - digital pin 9
 * Tremolo speed control - analog pin A1
-* Sine LFO - digital pin 3
-* Sawtooth LFO - digital pin 9
-* Reverse Sawtooth LFO - digital pin 10
-* Square wave LFO - digital pin 11
+* Tremolo mode rotary switch - analog pin A2
 
 ## Usage Notes
 Channel select and tremolo on/off switches should switch the pin between
@@ -30,9 +29,18 @@ to either 5v or 3.3v supply, wiper to analog pin A1 and top leg to
 ground. The speed range can be adjusted by the addition of series
 resistors on either side of the speed pot, to limit the voltage swing
 within the pot's travel. Higher voltage = slower speed. The default
-range provided is more than adequate for just about any appliocation; if
+range provided is more than adequate for just about any application; if
 anything it will go from faster than ever needed to too slow to be useful
 musically.
+
+Wire the four position rotary switch with equal value resistors between
+each pole. Pole one connects to ground, pole 4 to 5v, common to analog
+pin A2.
+
+The tremolo LFO is output on two pins in anti-phase to each other, ie
+whatever LFO-A is doing LFO-B is doing the reverse. This gives a very
+flexible arrangement for panning or for controlling output tube bias
+via a dual vactrol voltage divider in the bias supply circuit.
 
 Care must be taken to isolate the Arduino from the voltages present in a
 tyical valve based amplifier and to keep the current demands within what

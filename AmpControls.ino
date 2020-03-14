@@ -7,14 +7,12 @@
   * 
   * mains relay circuit on pin 12
   * channel switches pin 2 between 5v and ground
-  * trem on/off switches pin 6 between 5v and ground
-  * channel 1 output (relay or vactrol) pin 4
+  * channel 1 output (relay or vactrol) pin 3
   * channel 2 output (relay or vactrol) pin 4
-  * sine wave output on pin 3
-  * sawtooth output on pin 9
-  * saw reverse output on pin 10
-  * square wave output on pin 11
-  * tremolo indicator led on pin 7
+  * LFO A on pin 5
+  * LFO B on pin 6
+  * trem on/off switches pin 7 between 5v and ground
+  * tremolo indicator led on pin 9
  */
 
 // setup the pins for various purposes
@@ -23,23 +21,24 @@ const int mainsRelayPin = 12;
 
 // channel switching
 const int chswitchPin = 2;	// channel switch spst switch on/off
-const int ch1Pin = 4;		// first bank of vactrols
-const int ch2Pin = 5;		// second bank of vactrols
+const int ch1Pin = 3;		// first bank of vactrols
+const int ch2Pin = 4;		// second bank of vactrols
 int chswitchState = 0;		// variable reading channel switch state
 
 // tremolo section
-const int trswitchPin = 6;	// tremolo on/off switch
-const int trledPin = 7;
 int trswitchState = 0;
-const int sinePin = 3;		// pwm sine wave here
-const int sawPin = 9;		// sawtooth wave
-const int sawrevPin = 10;	// reverse sawtooth wave
-const int squarePin = 11;	// square wave
+int trmode = 0;
+const int traPin = 5;		// pwm wave here
+const int trbPin = 6;
+const int trswitchPin = 7;	// tremolo on/off switch
+const int trindPin = 9;
 
-// sine wave position
-byte position = 0;
-// the value for each position in the sine table
+// sine wave positions
+byte sina = 0;
+byte sinb = 0;
+// the value for each position in the sine and sine reverse tables
 byte s = 0;
+byte r = 127;
 // the tremolo rate
 int interval = 10;
 // counts the intervals that have passed, increments each time
@@ -50,31 +49,25 @@ int looprevCount = 255;
 // store last update time
 unsigned long previousMicros = 0;
 
-// Our sine wave table for trem, courtesy Collin Cunningham / Makezine.com
-
+// Our sine wave table for trem
 const byte sineTable[] = { 
-0x80, 0x83, 0x86, 0x89, 0x8D, 0x90, 0x93, 0x96, 0x99, 0x9C, 0x9F, 0xA2,
-0xA5, 0xA8, 0xAB, 0xAE, 0xB1, 0xB4, 0xB7, 0xBA, 0xBD, 0xBF, 0xC2, 0xC5,
-0xC7, 0xCA, 0xCD, 0xCF, 0xD1, 0xD4, 0xD6, 0xD9, 0xDB, 0xDD, 0xDF, 0xE1,
-0xE3, 0xE5, 0xE7, 0xE9, 0xEB, 0xEC, 0xEE, 0xF0, 0xF1, 0xF3, 0xF4, 0xF5,
-0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFC, 0xFD, 0xFE, 0xFE, 0xFF, 0xFF,
-0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFE,
-0xFD, 0xFD, 0xFC, 0xFB, 0xFA, 0xF9, 0xF8, 0xF7, 0xF6, 0xF5, 0xF3, 0xF2,
-0xF0, 0xEF, 0xED, 0xEC, 0xEA, 0xE8, 0xE6, 0xE4, 0xE2, 0xE0, 0xDE, 0xDC,
-0xDA, 0xD7, 0xD5, 0xD3, 0xD0, 0xCE, 0xCB, 0xC9, 0xC6, 0xC3, 0xC1, 0xBE,
-0xBB, 0xB8, 0xB5, 0xB3, 0xB0, 0xAD, 0xAA, 0xA7, 0xA4, 0xA1, 0x9E, 0x9B,
-0x98, 0x94, 0x91, 0x8E, 0x8B, 0x88, 0x85, 0x82, 0x7E, 0x7B, 0x78, 0x75,
-0x72, 0x6F, 0x6C, 0x69, 0x66, 0x63, 0x5F, 0x5C, 0x59, 0x56, 0x53, 0x50,
-0x4D, 0x4A, 0x47, 0x44, 0x42, 0x3F, 0x3C, 0x39, 0x37, 0x35, 0x32, 0x30,
-0x2D, 0x2B, 0x29, 0x26, 0x24, 0x22, 0x20, 0x1E, 0x1C, 0x1A, 0x18, 0x16,
-0x14, 0x13, 0x11, 0x10, 0x0E, 0x0D, 0x0B, 0x0A, 0x09, 0x08, 0x07, 0x06,
-0x05, 0x04, 0x03, 0x03, 0x02, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05,
-0x06, 0x07, 0x08, 0x09, 0x0B, 0x0C, 0x0D, 0x0F, 0x10, 0x12, 0x14, 0x15,
-0x17, 0x19, 0x1B, 0x1D, 0x1E, 0x21, 0x23, 0x25, 0x28, 0x2A, 0x2C, 0x2F,
-0x31, 0x33, 0x36, 0x39, 0x3B, 0x3E, 0x41, 0x43, 0x46, 0x49, 0x4C, 0x4F,
-0x51, 0x55, 0x58, 0x5B, 0x5E, 0x61, 0x64, 0x67, 0x6A, 0x6E, 0x70, 0x73,
-0x77, 0x7A, 0x7D, 0x80
+128, 131, 134, 137, 140, 143, 146, 149, 152, 155, 158, 162, 165, 167,
+170, 173, 176, 179, 182, 185, 188, 190, 193, 196, 198, 201, 203, 206,
+208, 211, 213, 215, 218, 220, 222, 224, 226, 228, 230, 232, 234, 235,
+237, 238, 240, 241, 243, 244, 245, 246, 248, 249, 250, 250, 251, 252,
+253, 253, 254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 254, 254,
+254, 253, 253, 252, 251, 250, 250, 249, 248, 246, 245, 244, 243, 241,
+240, 238, 237, 235, 234, 232, 230, 228, 226, 224, 222, 220, 218, 215,
+213, 211, 208, 206, 203, 201, 198, 196, 193, 190, 188, 185, 182, 179,
+176, 173, 170, 167, 165, 162, 158, 155, 152, 149, 146, 143, 140, 137,
+134, 131, 128, 124, 121, 118, 115, 112, 109, 106, 103, 100, 97, 93, 90,
+88, 85, 82, 79, 76, 73, 70, 67, 65, 62, 59, 57, 54, 52, 49, 47, 44, 42,
+40, 37, 35, 33, 31, 29, 27, 25, 23, 21, 20, 18, 17, 15, 14, 12, 11, 10,
+9, 7, 6, 5, 5, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2,
+3, 4, 5, 5, 6, 7, 9, 10, 11, 12, 14, 15, 17, 18, 20, 21, 23, 25, 27, 29,
+31, 33, 35, 37, 40, 42, 44, 47, 49, 52, 54, 57, 59, 62, 65, 67, 70, 73,
+76, 79, 82, 85, 88, 90, 93, 97, 100, 103, 106, 109, 112, 115, 118, 121,
+124
 };
 
 // the setup function runs once when you press reset or power the board
@@ -88,9 +81,10 @@ void setup() {
 	// initialize the vactrol pins as outputs
 	pinMode(ch1Pin, OUTPUT);
 	pinMode(ch2Pin, OUTPUT);
-	pinMode(trledPin, OUTPUT);
-	// initialize square wave pin as output
-	pinMode(squarePin, OUTPUT);
+	pinMode(trindPin, OUTPUT);
+	// initialize tremolo pins as output for square wave use
+	pinMode(traPin, OUTPUT);
+	pinMode(trbPin, OUTPUT);
 }
 
 
@@ -107,25 +101,15 @@ void loop() {
 		digitalWrite(ch1Pin, LOW);
 		digitalWrite(ch2Pin, HIGH);
 	}
-	
+
+    unsigned long currentMicros = micros();
 	// switch the tremolo on/off
 	trswitchState = digitalRead(trswitchPin);
 	if (trswitchState == HIGH) {
-		digitalWrite(trledPin, HIGH);
 		interval = (analogRead(1) * 20 + 1);
-		position = sineTable[s];
-		analogWrite(sinePin, position);
-		analogWrite(sawPin, loopCount);
-		analogWrite(sawrevPin, looprevCount);
-    unsigned long currentMicros = micros();
 		if (currentMicros - previousMicros >= interval) {
 			// save the last pwm state change time
 			previousMicros = currentMicros;
-			if (loopCount <= 127) {
-				digitalWrite(squarePin, HIGH);
-			} else {
-				digitalWrite(squarePin, LOW);
-			}
 			// reset loopCount and looprevCount at the end of cycle
 			if (loopCount >= 255) {
 				loopCount = 0;
@@ -133,19 +117,44 @@ void loop() {
 			if (looprevCount <= 0) {
 				looprevCount = 255;
 			}
-			// increment through the sine wave table
+			// increment through the sine wave tables
 			s++;
+			r++;
 			// increment the loop count, for square and saw waves
 			loopCount++;
 			// decrement the looprev count for sawrev wave
 			looprevCount--;
 		}
+		trmode = (analogRead(2)); // read our tremolo mode switch
+		if (trmode < 300) {
+			sina = sineTable[s];
+			sinb = sineTable[r];
+			analogWrite(traPin, sina);
+			analogWrite(trbPin, sinb);
+			analogWrite(trindPin, sina);
+		} else if (trmode < 600) {
+			analogWrite(traPin, loopCount);
+			analogWrite(trbPin, looprevCount);
+			analogWrite(trindPin, loopCount);
+		} else if (trmode < 900) {
+			analogWrite(traPin, looprevCount);
+			analogWrite(trbPin, loopCount);
+			analogWrite(trindPin, looprevCount);
+		} else {
+			if (loopCount <= 127) {
+				digitalWrite(traPin, HIGH);
+				digitalWrite(trbPin, LOW);
+				digitalWrite(trindPin, HIGH);
+			} else {
+				digitalWrite(traPin, LOW);
+				digitalWrite(trbPin, HIGH);
+				digitalWrite(trindPin, LOW);
+			}
+		}
 	} else {
-		digitalWrite(trledPin, LOW);
-		// set all of the LFO pins to mid level
-		analogWrite(sinePin, 127);
-		analogWrite(sawPin, 127);
-		analogWrite(sawrevPin, 127);
-		analogWrite(squarePin, 127);
+		digitalWrite(trindPin, LOW);
+		// set the LFO pins to mid level
+		analogWrite(traPin, 127);
+		analogWrite(trbPin, 127);
 	}
 }
